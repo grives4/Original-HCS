@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html  manifest="hcs.manifest">
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="apple-touch-startup-image" href="images/hcsSplash.jpg">
+
+<style type="text/css">
+
+input[type='range'] {  
+    -webkit-appearance: none;  
+    background-color: gray;
+   width: 100px; 
+   height: 400px;
+   -webkit-appearance: slider-vertical;    
+}  
+
+input[type='range']::-webkit-slider-thumb {  
+    -webkit-appearance: none;  
+    background-color: #009933;  
+    width: 100px;  
+    height: 50px; 
+}  
+</style>
+
+<script type="text/javascript" src="scripts/iscroll.js"></script>
+
+<script type="text/javascript">
+
+var myScroll;
+
+function loaded() {
+        myScroll = new IScroll('#wrapper', { eventPassthrough: true, scrollX: true, scrollY: false, snap: 'li', momentum: false, zoom: false});
+        getinfo('GetRadioStation');
+}
+
+</script>
+
+<script type="text/javascript">
+      
+   var radioButtonTime = new Date().getTime();
+   var tempDigits;
+   
+   function sendcommand(value) {
+
+     //document.getElementById('zonecontrolmap').style.visibility='hidden';
+     document.body.style.background = 'Gray';
+
+     request = new XMLHttpRequest();   
+
+     request.open('POST', '/command', true);
+     request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+     request.setRequestHeader('Content-length', value.length);
+     request.setRequestHeader('Connection', 'close');
+     request.send('name=' + value);
+  
+     setTimeout(makeimagesvisible,25);	
+ 
+   }
+
+   function makeimagesvisible() {
+
+     //document.getElementById('zonecontrolmap').style.visibility='visible';  
+    document.body.style.background = 'Black';
+
+   }
+
+   function getinfo(value) {
+
+     request = new XMLHttpRequest();   
+     
+     request.open('POST', '/getradiostation', true);
+     request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+     request.setRequestHeader('Content-length', value.length);
+     request.setRequestHeader('Connection', 'close');
+     request.send('name=' + value);
+
+      request.onreadystatechange=function(){
+         if(request.readyState == 4)
+         {
+            document.getElementById("station").innerHTML = request.responseText;
+         } 
+         else
+         {
+            document.getElementById("station").innerHTML = request.readyState;
+         }
+      }
+     
+   }
+   
+   function setradiostation(value) {
+     document.getElementById("station").innerHTML = value;
+     sendcommand(value);
+   }
+
+   function setradiobutton(value) {
+   
+     var tempTime = new Date().getTime();
+     var tempString;
+     
+     if ((tempTime > (5000 + radioButtonTime)) || (tempDigits > 108))
+     {
+         tempDigits = value.slice(5,6);
+         document.getElementById("station").innerHTML = '.' + tempDigits;
+     }
+     else
+     {
+         tempDigits = tempDigits + value.slice(5,6);
+         document.getElementById("station").innerHTML = [tempDigits.slice(0, tempDigits.length-1), '.', tempDigits.slice(tempDigits.length-1)].join('');
+     }
+
+     radioButtonTime = tempTime;     
+     sendcommand(value);
+   }
+
+   </script>
+
+<style type="text/css" media="all">
+
+
+#wrapper {
+	width:960px;
+	height:1440px;
+	position:relative;	/* On older OS versions "position" and "z-index" must be defined, */
+	z-index:1;			/* it seems that recent webkit is less picky and works anyway. */
+	overflow:hidden;
+
+}
+
+#scroller {
+	width:3840px;
+	height:1440px;
+}
+
+#scroller ul {
+	display:block;
+	float:left;
+	width:100%;
+	height:100%;
+	padding:0;
+	margin:0;
+}
+
+#scroller li {
+	display:block; float:left;
+	width:960px; height:1440px;
+}
+
+</style>
+
+</head>
+<body bgcolor=#000000 onload="loaded()">
+   <div id="wrapper">
+      <div id="scroller">
+         <ul>
+            <li>
+               <img src="images\MCE4.png" width="100%" usemap="#mcemap" />
+               <map name="mcemap">
+                 <area shape="rect" coords="190,700,380,910" onclick="sendcommand('enter')">
+                 <area shape="rect" coords="50,730,190,850" onclick="sendcommand('left')">
+                 <area shape="rect" coords="190,500,380,700" onclick="sendcommand('up')">
+                 <area shape="rect" coords="190,910,380,1110" onclick="sendcommand('down')">
+                 <area shape="rect" coords="380,730,520,850" onclick="sendcommand('right')">              
+                 <area shape="rect" coords="0,0,200,100" onclick="sendcommand('movies')">
+                 <area shape="rect" coords="200,0,500,100" onclick="sendcommand('recorded')">
+                 <area shape="rect" coords="550,0,750,100" onclick="sendcommand('guide')">
+                 <area shape="rect" coords="750,0,1000,100" onclick="sendcommand('live')">
+                 <area shape="rect" coords="50,125,275,350" onclick="sendcommand('rewind')">
+                 <area shape="rect" coords="275,125,500,350" onclick="sendcommand('skipback')">
+                 <area shape="rect" coords="500,125,725,350" onclick="sendcommand('skipforward')">
+                 <area shape="rect" coords="725,125,950,350" onclick="sendcommand('fastforward')">
+                 <area shape="rect" coords="50,370,275,570" onclick="sendcommand('back')">
+                 <area shape="rect" coords="275,370,500,570" onclick="sendcommand('pause')">
+                 <area shape="rect" coords="500,370,725,570" onclick="sendcommand('play')">
+                 <area shape="rect" coords="725,370,950,570" onclick="sendcommand('stop')">
+                 <area shape="rect" coords="625,550,850,800" onclick="sendcommand('channelup')">
+                 <area shape="rect" coords="625,800,850,1050" onclick="sendcommand('channeldown')">
+                 <area shape="rect" coords="75,1110,275,1250" onclick="sendcommand('theateron')">
+                 <area shape="rect" coords="75,1300,275,1400" onclick="sendcommand('theateroff')">
+                 <area shape="rect" coords="290,1110,515,1200" onclick="sendcommand('stereoup')">
+                 <area shape="rect" coords="290,1275,515,1450" onclick="sendcommand('stereodown')">
+                 <area shape="rect" coords="500,1110,740,1250" onclick="sendcommand('tvon')">
+                 <area shape="rect" coords="500,1300,740,1400" onclick="sendcommand('tvoff')">
+                 <area shape="rect" coords="725,1110,950,1200" onclick="sendcommand('tvup')">
+                 <area shape="rect" coords="725,1275,950,1450" onclick="sendcommand('tvdown')">
+               </map> 
+            </li>
+            <li>
+               <img id="zonecontrolmap" src="images\ZC6.png" width="100%" usemap="#zonecontrolmap" />
+               <map name="zonecontrolmap">
+                 <area shape="rect" coords="045,130,145,250" onclick="sendcommand('dencomputer')">
+                 <area shape="rect" coords="160,130,260,250" onclick="sendcommand('denradio')">
+                 <area shape="rect" coords="300,130,450,250" onclick="sendcommand('denup')">
+                 <area shape="rect" coords="045,270,145,380" onclick="sendcommand('denair')">
+                 <area shape="rect" coords="160,270,260,380" onclick="sendcommand('denoff')"> 
+                 <area shape="rect" coords="300,270,450,380" onclick="sendcommand('dendown')">
+                 
+                 <area shape="rect" coords="535,130,635,250" onclick="sendcommand('kitchencomputer')">
+                 <area shape="rect" coords="650,130,750,250" onclick="sendcommand('kitchenradio')">
+                 <area shape="rect" coords="790,130,940,250" onclick="sendcommand('kitchenup')">
+                 <area shape="rect" coords="535,270,635,380" onclick="sendcommand('kitchenair')">
+                 <area shape="rect" coords="650,270,750,380" onclick="sendcommand('kitchenoff')"> 
+                 <area shape="rect" coords="790,270,940,380" onclick="sendcommand('kitchendown')">
+                 
+                 <area shape="rect" coords="045,515,145,635" onclick="sendcommand('bedroomcomputer')">
+                 <area shape="rect" coords="160,515,260,635" onclick="sendcommand('bedroomradio')">
+                 <area shape="rect" coords="300,515,450,635" onclick="sendcommand('bedroomup')">
+                 <area shape="rect" coords="045,655,145,765" onclick="sendcommand('bedroomair')">
+                 <area shape="rect" coords="160,655,260,765" onclick="sendcommand('bedroomoff')"> 
+                 <area shape="rect" coords="300,655,450,765" onclick="sendcommand('bedroomdown')">
+
+                 <area shape="rect" coords="535,515,635,635" onclick="sendcommand('garagecomputer')">
+                 <area shape="rect" coords="650,515,750,635" onclick="sendcommand('garageradio')">
+                 <area shape="rect" coords="790,515,940,635" onclick="sendcommand('garageup')">
+                 <area shape="rect" coords="535,655,635,765" onclick="sendcommand('garageair')">
+                 <area shape="rect" coords="650,655,750,765" onclick="sendcommand('garageoff')"> 
+                 <area shape="rect" coords="790,655,940,765" onclick="sendcommand('garagedown')">
+                 
+                 <area shape="rect" coords="045,990,145,1110" onclick="sendcommand('stereocomputer')">
+                 <area shape="rect" coords="160,990,260,1110" onclick="sendcommand('stereoradio')">
+                 <area shape="rect" coords="300,990,450,1110" onclick="sendcommand('stereoup')">
+                 <area shape="rect" coords="045,1130,145,1240" onclick="sendcommand('stereoair')">
+                 <area shape="rect" coords="160,1130,260,1240" onclick="sendcommand('theateroff')"> 
+                 <area shape="rect" coords="300,1130,450,1240" onclick="sendcommand('stereodown')">
+                 
+                 <area shape="rect" coords="535,990,635,1110" onclick="sendcommand('porchcomputer')">
+                 <area shape="rect" coords="650,990,750,1110" onclick="sendcommand('porchradio')">
+                 <area shape="rect" coords="790,990,940,1110" onclick="sendcommand('porchup')">
+                 <area shape="rect" coords="535,1130,635,1240" onclick="sendcommand('porchair')">
+                 <area shape="rect" coords="650,1130,750,1240" onclick="sendcommand('porchoff')"> 
+                 <area shape="rect" coords="790,1130,940,1240" onclick="sendcommand('porchdown')">
+                 
+                 <area shape="rect" coords="30,1300,300,1400" onclick="sendcommand('everythingmute')">
+                 <area shape="rect" coords="315,1300,640,1400" onclick="sendcommand('everythingunmute')">
+                 <area shape="rect" coords="665,1300,940,1400" onclick="sendcommand('everythingoff')">  
+               </map> 
+            </li>
+            <li>
+               <div style="background-color:white;height:350px;" />
+               <div id="station" style="background-color:white;height:200px;font-weight:bold;font-size:180px;text-align:center;"></div>
+               <img src="images\Radio.png" width="100%" usemap="#radiomap" />  
+               <map name="radiomap">
+                  <area shape="rect" coords="40,300,450,400" onclick="setradiostation('103.5')"> 
+                  <area shape="rect" coords="40,400,450,520" onclick="setradiostation('94.7')"> 
+                  <area shape="rect" coords="500,300,950,400" onclick="setradiostation('90.5')"> 
+                  <area shape="rect" coords="500,400,950,520" onclick="setradiostation('96.7')"> 
+                  <area shape="rect" coords="500,520,950,640" onclick="setradiostation('93.3')"> 
+                  <area shape="rect" coords="500,640,950,760" onclick="setradiostation('107.1')"> 
+                  <area shape="rect" coords="500,760,950,880" onclick="setradiostation('98.1')"> 
+                  <area shape="rect" coords="40,640,150,760" onclick="setradiobutton('Radio1')"> 
+                  <area shape="rect" coords="40,760,150,880" onclick="setradiobutton('Radio4')"> 
+                  <area shape="rect" coords="40,880,150,1000" onclick="setradiobutton('Radio7')"> 
+                  <area shape="rect" coords="40,1000,150,1120" onclick="setradiobutton('Radio0')"> 
+                  <area shape="rect" coords="150,640,260,760" onclick="setradiobutton('Radio2')"> 
+                  <area shape="rect" coords="150,760,260,880" onclick="setradiobutton('Radio5')"> 
+                  <area shape="rect" coords="150,880,260,1000" onclick="setradiobutton('Radio8')"> 
+                  <area shape="rect" coords="260,640,370,760" onclick="setradiobutton('Radio3')"> 
+                  <area shape="rect" coords="260,760,370,880" onclick="setradiobutton('Radio6')"> 
+                  <area shape="rect" coords="260,880,370,1000" onclick="setradiobutton('Radio9')">   
+               </map>           
+            </li>
+            <li>
+               <img src="images\KP.png" width="100%" usemap="#keypadmap" />
+               <map name="keypadmap">
+                  <area shape="rect" coords="110,100,220,210" onclick="sendcommand('a')">
+                  <area shape="rect" coords="110,230,220,340" onclick="sendcommand('f')">
+                  <area shape="rect" coords="110,360,220,470" onclick="sendcommand('k')">
+                  <area shape="rect" coords="110,500,220,610" onclick="sendcommand('p')">
+                  <area shape="rect" coords="110,640,220,750" onclick="sendcommand('u')">
+                  <area shape="rect" coords="110,780,220,890" onclick="sendcommand('z')">
+                  <area shape="rect" coords="220,100,400,210" onclick="sendcommand('b')">
+                  <area shape="rect" coords="220,230,345,340" onclick="sendcommand('g')">
+                  <area shape="rect" coords="220,360,345,470" onclick="sendcommand('l')">
+                  <area shape="rect" coords="220,500,345,610" onclick="sendcommand('q')">
+                  <area shape="rect" coords="220,640,345,750" onclick="sendcommand('v')">
+                  <area shape="rect" coords="220,780,345,890" onclick="sendcommand('space')">
+                  <area shape="rect" coords="400,100,550,210" onclick="sendcommand('c')">
+                  <area shape="rect" coords="400,230,550,340" onclick="sendcommand('h')">
+                  <area shape="rect" coords="400,360,550,470" onclick="sendcommand('m')">
+                  <area shape="rect" coords="400,500,550,610" onclick="sendcommand('r')">
+                  <area shape="rect" coords="400,640,550,750" onclick="sendcommand('w')">
+                  <area shape="rect" coords="550,100,700,210" onclick="sendcommand('d')">
+                  <area shape="rect" coords="550,230,700,340" onclick="sendcommand('i')">
+                  <area shape="rect" coords="550,360,700,470" onclick="sendcommand('n')">
+                  <area shape="rect" coords="550,500,700,610" onclick="sendcommand('s')">
+                  <area shape="rect" coords="550,640,700,750" onclick="sendcommand('x')">
+                  <area shape="rect" coords="700,100,850,210" onclick="sendcommand('e')">
+                  <area shape="rect" coords="700,230,850,340" onclick="sendcommand('j')">
+                  <area shape="rect" coords="700,360,850,470" onclick="sendcommand('o')">
+                  <area shape="rect" coords="700,500,850,610" onclick="sendcommand('t')">
+                  <area shape="rect" coords="700,640,850,750" onclick="sendcommand('y')">                  
+                  <area shape="rect" coords="110,1000,250,1100" onclick="sendcommand('back')">
+                  <area shape="rect" coords="525,1000,725,1210" onclick="sendcommand('enter')">
+                  <area shape="rect" coords="380,1000,525,1210" onclick="sendcommand('left')">
+                  <area shape="rect" coords="525,800,725,1000" onclick="sendcommand('up')">
+                  <area shape="rect" coords="525,1210,725,1410" onclick="sendcommand('down')">
+                  <area shape="rect" coords="725,1000,865,1210" onclick="sendcommand('right')">            
+               </map> 
+            </li>
+         </ul>
+      </div>
+   </div>
+</body>
+</html>

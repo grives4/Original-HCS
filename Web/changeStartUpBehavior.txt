@@ -1,0 +1,1 @@
+File is located at /etc/init.d/hcs
